@@ -1,0 +1,10 @@
+{
+    "name": "nightmodel",
+    "version": "1.0.0",
+    "main": "shankey-solver.js",
+    "license": "MIT",
+    "type": "module",
+    "dependencies": {
+        "js-yaml": "^4.1.0"
+    }
+}
