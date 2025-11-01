@@ -1,5 +1,10 @@
-# Named parameters referenced in constraints
-parameters:
+# Simplified YAML structure:
+# - All values (parameters and constraints) are in one section
+# - Slugs are unique across nodes and flows, no need for prefixes
+# - Values can be numbers, formulas, or reference other slugs
+
+values:
+    # Input parameters (constants)
     distance: 1380
     coaches: 10
     cost_per_km: 28
@@ -10,63 +15,60 @@ parameters:
     avg_ticket_price: 137.38
     subsidy_train: 32200
 
+    # Flow values (formulas)
+    tickets: avg_ticket_price * seats * occupancy
+    subsidy: subsidy_train
+    #rdc_profit: 4900
+    rdc_profit: (per_km_costs + fixed_costs) * 0.1
+    per_km_costs: distance * cost_per_km
+    fixed_costs: cost_per_coach * coaches
+
 # Graph nodes
 nodes:
-    - id: tickets
+    - id: n_tickets
       label: "Tickets revenue"
-    - id: subsidy
+    - id: n_subsidy
       label: "Subsidy"
-    - id: revenue
+    - id: n_revenue
       label: "Revenue"
-    - id: sbb_profit
+    - id: n_sbb_profit
       label: "SBB profit"
-    - id: cost
+    - id: n_cost
       label: "Cost"
-    - id: rdc_profit
+    - id: n_rdc_profit
       label: "RDC profit"
-    - id: per_km_costs
+    - id: n_per_km_costs
       label: "Per km costs"
-    - id: fixed_costs
+    - id: n_fixed_costs
       label: "Fixed costs"
 
 # Directed flows between nodes
 flows:
     - id: tickets
-      from: tickets
-      to: revenue
+      from: n_tickets
+      to: n_revenue
       label: "Tickets sold"
     - id: subsidy
-      from: subsidy
-      to: revenue
+      from: n_subsidy
+      to: n_revenue
       label: "Subsidy"
     - id: sbb_profit
-      from: revenue
-      to: sbb_profit
+      from: n_revenue
+      to: n_sbb_profit
       label: "SBB profit"
     - id: cost
-      from: revenue
-      to: cost
+      from: n_revenue
+      to: n_cost
       label: "Net cost"
     - id: rdc_profit
-      from: cost
-      to: rdc_profit
+      from: n_cost
+      to: n_rdc_profit
       label: "RDC profit"
     - id: per_km_costs
-      from: cost
-      to: per_km_costs
+      from: n_cost
+      to: n_per_km_costs
       label: "Per km costs"
     - id: fixed_costs
-      from: cost
-      to: fixed_costs
+      from: n_cost
+      to: n_fixed_costs
       label: "Fixed costs"
-
-# Equations defining flow values
-# Operators: +, -, *, /, ==
-# References: flows.<id>, parameters.<name>
-constraints:
-    - "flows.tickets == parameters.avg_ticket_price * parameters.seats * parameters.occupancy"
-    - "flows.subsidy == parameters.subsidy_train"
-    - "flows.rdc_profit == 4900"
-    #- "flows.rdc_profit == (flows.per_km_costs + flows.fixed_costs) * 0.1"
-    - "flows.per_km_costs == parameters.distance * parameters.cost_per_km"
-    - "flows.fixed_costs == parameters.cost_per_coach * parameters.coaches"

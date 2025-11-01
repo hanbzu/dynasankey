@@ -2,6 +2,7 @@ import yaml from "js-yaml";
 import fs from "fs";
 import { solve } from "./src/solver.js";
 import { formatResult } from "./src/formatter.js";
+import { parseSimplifiedYaml, validateSimplifiedYaml } from "./src/parser.js";
 
 // ============================================================================
 // CLI Interface
@@ -32,7 +33,13 @@ const main = () => {
     const filename = args[0];
 
     try {
-        const config = readYamlFile(filename);
+        const yamlData = readYamlFile(filename);
+
+        // Validate and parse the simplified YAML format
+        validateSimplifiedYaml(yamlData);
+        const config = parseSimplifiedYaml(yamlData);
+
+        // Solve the system
         const result = solve(config);
         console.log(formatResult(result));
 

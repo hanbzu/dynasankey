@@ -1,8 +1,9 @@
-import { watch } from 'fs';
-import { solve } from './src/solver.js';
-import { formatResult } from './src/formatter.js';
-import yaml from 'js-yaml';
-import fs from 'fs';
+import { watch } from "fs";
+import { solve } from "./src/solver.js";
+import { formatResult } from "./src/formatter.js";
+import { parseSimplifiedYaml, validateSimplifiedYaml } from "./src/parser.js";
+import yaml from "js-yaml";
+import fs from "fs";
 
 /**
  * Reads and parses a YAML file.
@@ -10,7 +11,7 @@ import fs from 'fs';
  * @returns {Object} Parsed YAML content
  */
 const readYamlFile = (filename) => {
-    const fileContents = fs.readFileSync(filename, 'utf8');
+    const fileContents = fs.readFileSync(filename, "utf8");
     return yaml.load(fileContents);
 };
 
@@ -21,25 +22,32 @@ const readYamlFile = (filename) => {
 const runSolver = (filename) => {
     const timestamp = new Date().toLocaleTimeString();
     console.log(`\n[$timestamp] Running solver on ${filename}...`);
-    console.log('='.repeat(80));
+    console.log("=".repeat(80));
 
     try {
-        const config = readYamlFile(filename);
+        const yamlData = readYamlFile(filename);
+
+        // Validate and parse the simplified YAML format
+        validateSimplifiedYaml(yamlData);
+        const config = parseSimplifiedYaml(yamlData);
+
         const result = solve(config);
         console.log(formatResult(result));
 
         if (result.success) {
-            console.log('='.repeat(80));
+            console.log("=".repeat(80));
             console.log(`✓ Solved successfully`);
         } else {
-            console.log('='.repeat(80));
+            console.log("=".repeat(80));
             console.log(`✗ Failed to solve`);
         }
     } catch (error) {
         console.error(`✗ Error: ${error.message}`);
     }
 
-    console.log(`\nWatching for changes to ${filename}... (Press Ctrl+C to stop)`);
+    console.log(
+        `\nWatching for changes to ${filename}... (Press Ctrl+C to stop)`,
+    );
 };
 
 /**
@@ -49,7 +57,7 @@ const main = () => {
     const args = process.argv.slice(2);
 
     if (args.length === 0) {
-        console.error('Usage: node watch.js <yaml-file>');
+        console.error("Usage: node watch.js <yaml-file>");
         process.exit(1);
     }
 
@@ -69,7 +77,7 @@ const main = () => {
     // Watch for changes
     let timeout;
     watch(filename, (eventType) => {
-        if (eventType === 'change') {
+        if (eventType === "change") {
             // Debounce rapid successive changes
             clearTimeout(timeout);
             timeout = setTimeout(() => {

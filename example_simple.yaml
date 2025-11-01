@@ -1,0 +1,36 @@
+# Minimal example of the simplified YAML structure
+# This shows a simple 3-node flow: Source -> Process -> Sink
+
+values:
+    # Input parameters (constants)
+    input_total: 100
+    loss_rate: 0.1
+
+    # Flow values (formulas)
+    flow_in: input_total
+    flow_loss: flow_in * loss_rate
+    flow_out: flow_in * (1 - loss_rate)
+
+nodes:
+    - id: source
+      label: "Source"
+    - id: process
+      label: "Process Node"
+    - id: sink
+      label: "Sink"
+    - id: losses
+      label: "Losses"
+
+flows:
+    - id: flow_in
+      from: source
+      to: process
+      label: "Input"
+    - id: flow_out
+      from: process
+      to: sink
+      label: "Output"
+    - id: flow_loss
+      from: process
+      to: losses
+      label: "Losses"

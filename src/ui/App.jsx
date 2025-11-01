@@ -2,6 +2,7 @@ import { useState } from "react";
 import yaml from "js-yaml";
 import { solve } from "../solver.js";
 import { formatResult } from "../formatter.js";
+import { parseSimplifiedYaml, validateSimplifiedYaml } from "../parser.js";
 
 function App() {
     const [result, setResult] = useState(null);
@@ -21,7 +22,11 @@ function App() {
         reader.onload = (e) => {
             try {
                 const yamlContent = e.target.result;
-                const config = yaml.load(yamlContent);
+                const yamlData = yaml.load(yamlContent);
+
+                // Validate and parse the simplified YAML format
+                validateSimplifiedYaml(yamlData);
+                const config = parseSimplifiedYaml(yamlData);
 
                 const solveResult = solve(config);
                 setResult(solveResult);

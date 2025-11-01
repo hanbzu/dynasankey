@@ -1,6 +1,8 @@
 # Sankey Diagram Solver
 
-A web application and CLI tool that solves Sankey flow diagrams using constraint satisfaction. Define your network topology and constraints in YAML, and the solver determines all flow values automatically using node balance equations.
+A web application and CLI tool that solves Sankey flow diagrams using constraint satisfaction. Define your network topology and flow values in a simplified YAML format, and the solver determines all remaining flow values automatically using node balance equations.
+
+**Key Feature:** Uses a simplified YAML structure where you define all values (both parameters and flow formulas) in one place, without needing prefixes like `flows.` or `parameters.`.
 
 ## Quick Start
 
@@ -49,23 +51,31 @@ node sankey-solver.js example.yaml
 
 ## What It Does
 
-The solver takes a YAML definition of:
+The solver takes a simplified YAML definition of:
+- **Values** (parameters and flow formulas in one section)
 - **Nodes** (sources, sinks, and intermediate points)
 - **Flows** (directed edges between nodes)
-- **Constraints** (explicit equations for flow values)
 
 It then:
-1. Evaluates explicit constraints to get initial flow values
+1. Evaluates flow formulas to get initial flow values
 2. Iteratively applies node balance (sum of inputs = sum of outputs)
 3. Solves for all remaining flows or reports which flows are underdetermined
 
 ## YAML Configuration
 
+The YAML configuration uses a simplified structure where:
+- **values**: Contains both parameters (constants) and flow formulas in one place
+- **nodes**: Defines the nodes in your diagram
+- **flows**: Defines the directed edges between nodes
+
+Slugs (IDs) must be unique across both nodes and flows, so you can reference them directly without prefixes like `flows.` or `parameters.`.
+
 ### Minimal Example
 
 ```yaml
-parameters:
+values:
   total: 100
+  flow1: total
 
 nodes:
   - id: source
@@ -75,18 +85,22 @@ flows:
   - id: flow1
     from: source
     to: sink
-
-constraints:
-  - "flows.flow1 == parameters.total"
 ```
 
 ### Complete Example (Power Distribution)
 
 ```yaml
-parameters:
+values:
+  # Input parameters
   total_energy: 1000
   residential_demand: 400
   loss_rate: 0.15
+  
+  # Flow formulas
+  src_trans: total_energy
+  trans_res: residential_demand
+  trans_loss: src_trans * loss_rate
+  # trans_ind will be solved via balance constraint at transmission node
 
 nodes:
   - id: source
@@ -117,12 +131,6 @@ flows:
     from: transmission
     to: losses
     label: "Line Losses"
-
-constraints:
-  - "flows.src_trans == parameters.total_energy"
-  - "flows.trans_res == parameters.residential_demand"
-  - "flows.trans_loss == flows.src_trans * parameters.loss_rate"
-  # flows.trans_ind will be solved via balance constraint at transmission node
 ```
 
 **Output:**
@@ -136,29 +144,34 @@ Flow values:
   trans_ind: 450
 ```
 
-## Constraint Syntax
+## Values Syntax
 
-Constraints use a simple expression language:
+The `values` section contains both constants and formulas. Each entry can be:
+- A **number**: A constant value (can be a parameter or a fixed flow value)
+- A **formula**: An expression referencing other values
 
 ```yaml
-constraints:
-  # Reference parameters
-  - "flows.flow1 == parameters.total"
-
-  # Reference other flows
-  - "flows.flow2 == flows.flow1 * 0.5"
-
-  # Use arithmetic
-  - "flows.flow3 == (flows.flow1 + flows.flow2) / 2"
-
-  # Calculate losses
-  - "flows.loss == flows.input * parameters.loss_rate"
-
-  # Complex expressions
-  - "flows.output == flows.input * (1 - parameters.loss_rate) + parameters.boost"
+values:
+  # Constants
+  total: 100
+  loss_rate: 0.15
+  boost: 10
+  
+  # Simple references
+  flow1: total
+  
+  # Arithmetic expressions
+  flow2: flow1 * 0.5
+  flow3: (flow1 + flow2) / 2
+  
+  # Using parameters in formulas
+  loss: input * loss_rate
+  output: input * (1 - loss_rate) + boost
 ```
 
 **Supported operators:** `+`, `-`, `*`, `/`, `(`, `)`
+
+**Note:** The solver automatically detects whether a slug refers to a flow or a parameter based on your `flows` definitions.
 
 ## Output Examples
 
@@ -210,8 +223,47 @@ Balance violations:
 
 ## Programmatic Usage
 
+### Using Simplified YAML
+
 ```javascript
-import { solve } from './sankey-solver.js';
+import yaml from 'js-yaml';
+import { parseSimplifiedYaml, validateSimplifiedYaml } from './src/parser.js';
+import { solve } from './src/solver.js';
+
+const yamlString = `
+values:
+  total: 100
+  ab: total
+
+nodes:
+  - id: A
+  - id: B
+
+flows:
+  - id: ab
+    from: A
+    to: B
+`;
+
+const yamlData = yaml.load(yamlString);
+validateSimplifiedYaml(yamlData);
+const config = parseSimplifiedYaml(yamlData);
+const result = solve(config);
+
+if (result.success) {
+  console.log(result.flows); // { ab: 100 }
+} else {
+  console.log(result.error); // "Underdetermined system"
+  console.log(result.undeterminedFlows); // ["flow2", "flow3"]
+}
+```
+
+### Using Internal Format Directly
+
+If you prefer to work with the internal format directly (without parsing YAML):
+
+```javascript
+import { solve } from './src/solver.js';
 
 const result = solve({
   parameters: { total: 100 },
@@ -223,8 +275,7 @@ const result = solve({
 if (result.success) {
   console.log(result.flows); // { ab: 100 }
 } else {
-  console.log(result.error); // "Underdetermined system"
-  console.log(result.undeterminedFlows); // ["flow2", "flow3"]
+  console.log(result.error);
 }
 ```
 

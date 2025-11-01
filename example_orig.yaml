@@ -1,8 +1,17 @@
-# Named parameters referenced in constraints
-parameters:
+# Simplified YAML structure example: Power Distribution Network
+# This example shows how to model a power distribution system with transmission losses
+
+values:
+    # Input parameters (constants)
     total_energy: 1000
     residential_demand: 400
     loss_rate: 0.15
+
+    # Flow formulas (calculated values)
+    src_trans: total_energy
+    trans_res: residential_demand
+    trans_loss: src_trans * loss_rate
+    # trans_ind will be solved via balance constraint at transmission node
 
 # Graph nodes
 nodes:
@@ -15,7 +24,7 @@ nodes:
     - id: industrial
       label: "Industrial"
     - id: losses
-      label: "Losses"
+      label: "Line Losses"
 
 # Directed flows between nodes
 flows:
@@ -35,12 +44,3 @@ flows:
       from: transmission
       to: losses
       label: "Line Losses"
-
-# Equations defining flow values
-# Operators: +, -, *, /, ==
-# References: flows.<id>, parameters.<name>
-constraints:
-    - "flows.src_trans == parameters.total_energy"
-    - "flows.trans_res == parameters.residential_demand"
-    - "flows.trans_loss == flows.src_trans * parameters.loss_rate"
-    # flows.trans_ind will be solved via balance constraint
