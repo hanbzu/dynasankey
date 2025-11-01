@@ -1,6 +1,6 @@
 # Sankey Diagram Solver
 
-A CLI tool that solves Sankey flow diagrams using constraint satisfaction. Define your network topology and constraints in YAML, and the solver determines all flow values automatically using node balance equations.
+A web application and CLI tool that solves Sankey flow diagrams using constraint satisfaction. Define your network topology and constraints in YAML, and the solver determines all flow values automatically using node balance equations.
 
 ## Quick Start
 
@@ -8,11 +8,43 @@ A CLI tool that solves Sankey flow diagrams using constraint satisfaction. Defin
 # Install dependencies
 npm install
 
-# Run solver on example
+# Start web UI
+npm run dev
+
+# Or use CLI
 node sankey-solver.js example.yaml
 
 # Run tests
 npm test
+
+# Build for production
+npm run build
+```
+
+## Usage
+
+### Web UI
+
+The web interface provides an easy way to upload YAML files and see results:
+
+1. Start the development server: `npm run dev`
+2. Open your browser to `http://localhost:5173`
+3. Upload a YAML configuration file
+4. View the solver results instantly
+
+The web UI displays the same formatted output as the CLI, color-coded for success (green) or errors (red).
+
+**Deploy to GitHub Pages:**
+```bash
+npm run deploy
+```
+
+### CLI
+
+Use the command-line interface for automation and scripting:
+
+```bash
+node sankey-solver.js example.yaml
 ```
 
 ## What It Does
@@ -217,10 +249,14 @@ nightmodel/
 │   ├── balance.js         # Node balance solving (138 lines)
 │   ├── verification.js    # Solution verification (83 lines)
 │   ├── formatter.js       # Output formatting (99 lines)
+│   ├── ui/
+│   │   ├── App.jsx        # React web interface
+│   │   └── main.jsx       # React entry point
 │   └── *.test.js          # Test files (140 tests)
+├── index.html             # Web UI HTML entry point
 ├── vite.config.js         # Vite/Vitest configuration
 └── example.yaml           # Example diagram
-```
+```</system_warning>
 
 The codebase is modularized for testability and maintainability. Each module has a single responsibility and comprehensive test coverage.
 
