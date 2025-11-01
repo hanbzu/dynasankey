@@ -112,16 +112,16 @@ Constraints use a simple expression language:
 constraints:
   # Reference parameters
   - "flows.flow1 == parameters.total"
-  
+
   # Reference other flows
   - "flows.flow2 == flows.flow1 * 0.5"
-  
+
   # Use arithmetic
   - "flows.flow3 == (flows.flow1 + flows.flow2) / 2"
-  
+
   # Calculate losses
   - "flows.loss == flows.input * parameters.loss_rate"
-  
+
   # Complex expressions
   - "flows.output == flows.input * (1 - parameters.loss_rate) + parameters.boost"
 ```
@@ -275,20 +275,11 @@ describe('evaluateExpression', () => {
 
 ## Common Use Cases
 
-### Energy Distribution
-Model power grids with generation sources, transmission losses, and consumption endpoints.
-
-### Supply Chain
-Track material flows through manufacturing processes with waste and byproducts.
-
-### Financial Flows
-Represent budget allocation, cost centers, and spending categories.
-
-### Network Traffic
-Model data flows through network nodes with bandwidth constraints.
-
-### Water Systems
-Simulate water distribution with pumping stations, storage, and consumption.
+- Energy Distribution: Model power grids with generation sources, transmission losses, and consumption endpoints.
+- Supply Chain: Track material flows through manufacturing processes with waste and byproducts.
+- Financial Flows: Represent budget allocation, cost centers, and spending categories.
+- Network Traffic: Model data flows through network nodes with bandwidth constraints.
+- Water Systems: Simulate water distribution with pumping stations, storage, and consumption.
 
 ## Limitations & Notes
 
@@ -355,5 +346,5 @@ MIT
 
 ---
 
-**Version:** 1.0.0  
+**Version:** 1.0.0
 **Status:** ✅ Production Ready with Comprehensive Tests
