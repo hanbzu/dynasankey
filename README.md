@@ -8,19 +8,19 @@ A web application and CLI tool that solves Sankey flow diagrams using constraint
 
 ```bash
 # Install dependencies
-npm install
+yarn
 
 # Start web UI
-npm run dev
+yarn dev
 
 # Or use CLI
-node sankey-solver.js example.yaml
+node cli.js example.yaml
 
 # Run tests
-npm test
+yarn test
 
 # Build for production
-npm run build
+yarn build
 ```
 
 ## Usage
@@ -29,7 +29,7 @@ npm run build
 
 The web interface provides an easy way to upload YAML files and see results:
 
-1. Start the development server: `npm run dev`
+1. Start the development server: `yarn dev`
 2. Open your browser to `http://localhost:5173`
 3. Upload a YAML configuration file
 4. View the solver results instantly
@@ -38,7 +38,7 @@ The web UI displays the same formatted output as the CLI, color-coded for succes
 
 **Deploy to GitHub Pages:**
 ```bash
-npm run deploy
+yarn deploy
 ```
 
 ### CLI
@@ -46,7 +46,7 @@ npm run deploy
 Use the command-line interface for automation and scripting:
 
 ```bash
-node sankey-solver.js example.yaml
+node cli.js example.yaml
 ```
 
 ## What It Does
@@ -95,7 +95,7 @@ values:
   total_energy: 1000
   residential_demand: 400
   loss_rate: 0.15
-  
+
   # Flow formulas
   src_trans: total_energy
   trans_res: residential_demand
@@ -148,7 +148,9 @@ Flow values:
 
 The `values` section contains both constants and formulas. Each entry can be:
 - A **number**: A constant value (can be a parameter or a fixed flow value)
-- A **formula**: An expression referencing other values
+- A **formula**: An expression referencing other values (including other flows)
+
+**Dependency Resolution:** Formulas can reference other flows, and the parser automatically sorts them using topological sorting to ensure dependencies are evaluated first. You can write formulas in any order.
 
 ```yaml
 values:
@@ -156,17 +158,22 @@ values:
   total: 100
   loss_rate: 0.15
   boost: 10
-  
+
   # Simple references
   flow1: total
-  
+
   # Arithmetic expressions
   flow2: flow1 * 0.5
   flow3: (flow1 + flow2) / 2
-  
+
   # Using parameters in formulas
   loss: input * loss_rate
   output: input * (1 - loss_rate) + boost
+
+  # Formulas with flow dependencies (order doesn't matter)
+  cost_a: base * rate_a
+  cost_b: base * rate_b
+  total_cost: (cost_a + cost_b) * markup  # Automatically evaluated after cost_a and cost_b
 ```
 
 **Supported operators:** `+`, `-`, `*`, `/`, `(`, `)`
@@ -293,7 +300,7 @@ import { solve } from './src/solver.js';
 
 ```
 nightmodel/
-├── sankey-solver.js       # CLI entry point (26 lines)
+├── cli.js       # CLI entry point (26 lines)
 ├── src/
 │   ├── solver.js          # Main orchestration (99 lines)
 │   ├── expressions.js     # Expression evaluation (102 lines)
@@ -320,13 +327,13 @@ This project has **140 tests** covering all modules:
 npm test
 
 # Run all tests once
-npm run test:run
+yarn test:run
 
 # Interactive browser UI
-npm run test:ui
+yarn test:ui
 
 # Generate coverage report
-npm run test:coverage
+yarn test:coverage
 ```
 
 ### Test Coverage
@@ -358,7 +365,7 @@ describe('evaluateExpression', () => {
 2. **Edit code** in `src/` directory
 3. **Tests auto-run** on file save
 4. **Fix failures** and repeat
-5. **Final check:** `npm run test:run`
+5. **Final check:** `yarn test:run`
 
 ## Common Use Cases
 
@@ -415,8 +422,8 @@ For large graphs:
 
 When adding new features:
 1. ✅ Write tests first (TDD approach)
-2. ✅ Ensure all tests pass: `npm run test:run`
-3. ✅ Maintain or improve coverage: `npm run test:coverage`
+2. ✅ Ensure all tests pass: `yarn test:run`
+3. ✅ Maintain or improve coverage: `yarn test:coverage`
 4. ✅ Update documentation
 
 ## Statistics

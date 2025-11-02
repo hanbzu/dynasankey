@@ -311,7 +311,7 @@ function App() {
                             margin: 0,
                         }}
                     >
-                        <code>node sankey-solver.js example.yaml</code>
+                        <code>node cli.js example.yaml</code>
                     </pre>
                 </div>
             </main>

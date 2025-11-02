@@ -65,11 +65,14 @@ export const parseSimplifiedYaml = (yaml) => {
         },
     );
 
+    // Sort constraints by dependency order (topological sort)
+    const sortedConstraints = topologicalSortConstraints(constraints);
+
     return {
         parameters,
         nodes,
         flows,
-        constraints,
+        constraints: sortedConstraints,
     };
 };
 
@@ -147,4 +150,93 @@ export const validateSimplifiedYaml = (yaml) => {
             throw new Error(`Flow "${flow.id}" must have a "to" field`);
         }
     }
+};
+
+/**
+ * Extracts the flow ID from the left side of a constraint.
+ * @param {string} constraint - Constraint string (e.g., "flows.x == ...")
+ * @returns {string|null} Flow ID or null if not found
+ */
+const extractFlowId = (constraint) => {
+    const match = constraint.match(/^flows\.(\w+)\s*==/);
+    return match ? match[1] : null;
+};
+
+/**
+ * Extracts all flow IDs referenced in the right side of a constraint.
+ * @param {string} constraint - Constraint string
+ * @returns {Array<string>} Array of flow IDs referenced
+ */
+const extractDependencies = (constraint) => {
+    const rightSide = constraint.split("==")[1] || "";
+    const matches = rightSide.matchAll(/flows\.(\w+)/g);
+    return Array.from(matches, (m) => m[1]);
+};
+
+/**
+ * Topologically sorts constraints so that dependencies are evaluated first.
+ * Uses Kahn's algorithm for topological sorting.
+ * @param {Array<string>} constraints - Array of constraint strings
+ * @returns {Array<string>} Sorted constraints
+ */
+const topologicalSortConstraints = (constraints) => {
+    // Build dependency graph
+    const graph = new Map(); // flowId -> constraint string
+    const dependencies = new Map(); // flowId -> Set of flowIds it depends on
+    const dependents = new Map(); // flowId -> Set of flowIds that depend on it
+
+    // Initialize maps
+    for (const constraint of constraints) {
+        const flowId = extractFlowId(constraint);
+        if (flowId) {
+            graph.set(flowId, constraint);
+            dependencies.set(flowId, new Set(extractDependencies(constraint)));
+            dependents.set(flowId, new Set());
+        }
+    }
+
+    // Build dependent relationships
+    for (const [flowId, deps] of dependencies.entries()) {
+        for (const dep of deps) {
+            if (dependents.has(dep)) {
+                dependents.get(dep).add(flowId);
+            }
+        }
+    }
+
+    // Kahn's algorithm
+    const sorted = [];
+    const queue = [];
+
+    // Find nodes with no dependencies
+    for (const [flowId, deps] of dependencies.entries()) {
+        if (deps.size === 0) {
+            queue.push(flowId);
+        }
+    }
+
+    while (queue.length > 0) {
+        const flowId = queue.shift();
+        sorted.push(graph.get(flowId));
+
+        // Remove this node from its dependents' dependency lists
+        const deps = dependents.get(flowId) || new Set();
+        for (const dependent of deps) {
+            const depSet = dependencies.get(dependent);
+            depSet.delete(flowId);
+
+            // If dependent now has no dependencies, add to queue
+            if (depSet.size === 0) {
+                queue.push(dependent);
+            }
+        }
+    }
+
+    // Check for cycles
+    if (sorted.length !== constraints.length) {
+        // There's a cycle - just return original order and let solver handle it
+        return constraints;
+    }
+
+    return sorted;
 };
