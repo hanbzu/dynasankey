@@ -1,4 +1,4 @@
-# Sankey Diagram Solver
+# Sankey Diagram Solver https://hanbzu.github.io/dynasankey/
 
 A web application and CLI tool that solves Sankey flow diagrams using constraint satisfaction. Define your network topology and flow values in a simplified YAML format, and the solver determines all remaining flow values automatically using node balance equations.
 

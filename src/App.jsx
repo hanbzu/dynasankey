@@ -5,20 +5,7 @@ import SankeyPlot from './SankeyPlot.jsx';
 import ValuesEditor from './ValuesEditor.jsx';
 
 function App() {
-  const [tmpValues, setTmpValues] = React.useState({
-    seats: '350',
-    occupancy: '0.7',
-    avg_ticket_price: '137.38',
-    tickets: 'avg_ticket_price * seats * occupancy',
-    subsidy: '32200',
-    rdc_profit: '(per_km_cost + fixed_cost) * 0.1',
-    distance: '1380',
-    per_km_cost: 'distance * 28',
-    coaches: '10',
-    fixed_cost: 'coaches * 1000',
-  });
-
-  const values = {
+  const [values, setValues] = React.useState({
     seats: 350,
     occupancy: 0.7,
     avg_ticket_price: 137.38,
@@ -29,7 +16,9 @@ function App() {
     per_km_cost: (d) => d.distance * 28,
     coaches: 10,
     fixed_cost: (d) => d.coaches * 1000,
-  };
+  });
+
+  console.log('···values', values);
 
   const flows = {
     tickets: { to: 'revenue' },
@@ -41,8 +30,9 @@ function App() {
     fixed_cost: { from: 'cost' },
   };
 
+  const dataSolved = solve({ ...values, ...getAdditionalFormulasBasedOnFlows(flows, Object.keys(values)) });
   const sankeyData = adaptData({
-    values: solve({ ...values, ...getAdditionalFormulasBasedOnFlows(flows, Object.keys(values)) }),
+    values: dataSolved,
     flows,
   });
   console.log('sankeyData', sankeyData);
@@ -63,7 +53,7 @@ function App() {
 
       <main>
         <SankeyPlot height={400} width={800} sankeyData={sankeyData} />
-        <ValuesEditor data={tmpValues} onChange={setTmpValues} />
+        <ValuesEditor data={values} dataSolved={dataSolved} onChange={setValues} />
       </main>
     </div>
   );
@@ -72,16 +62,16 @@ function App() {
 export default App;
 
 function adaptData({ values, flows }) {
-  console.log('···values', values);
-  console.log('···flows', flows);
+  // console.log('···values', values);
+  // console.log('···flows', flows);
   const nodes = _.uniq(
     Object.entries(flows)
-      .reduce((acc, [key, { from, to }]) => [...acc, from ?? `_${key}-from`, to ?? `_${key}-to`], [])
+      .reduce((acc, [key, { from, to }]) => [...acc, from ?? key, to ?? key], [])
       .filter((d) => d)
   ).map((name, i) => ({ node: i, name }));
   const links = Object.entries(flows).map(([key, { from, to }]) => ({
-    source: nodes.findIndex((d) => d.name === (from ?? `_${key}-from`)),
-    target: nodes.findIndex((d) => d.name === (to ?? `_${key}-to`)),
+    source: nodes.findIndex((d) => d.name === (from ?? key)),
+    target: nodes.findIndex((d) => d.name === (to ?? key)),
     value: values[key],
   }));
   return { nodes, links };

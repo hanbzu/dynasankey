@@ -1,64 +1,101 @@
+import React from 'react';
 import _ from 'lodash';
 import styles from './ValuesEditor.module.css';
+import TrashIcon from './assets/icons/TrashIcon';
 
-export default function ValuesEditor({ data, onChange }) {
-  const entries = Object.entries(data);
-
-  const handleKeyChange = (oldKey, newKey) => {
-    if (oldKey === newKey) return;
-
-    const newData = { ...data };
-    const value = newData[oldKey];
-    delete newData[oldKey];
-    newData[newKey] = value;
-    onChange(newData);
-  };
-
-  const handleValueChange = (key, newValue) => {
-    onChange({
-      ...data,
-      [key]: newValue,
-    });
-  };
+export default function ValuesEditor({ data, dataSolved = {}, onChange }) {
+  const [newKey, setNewKey] = React.useState();
 
   return (
     <div className={styles.container}>
-      <div className={styles.addButtonContainer}>
-        <button
-          onClick={() => {
-            let newKey = 'new_variable';
-            let counter = 1;
-
-            while (data[newKey]) {
-              newKey = `new_variable_${counter}`;
-              counter++;
-            }
-
-            onChange({
-              ...data,
-              [newKey]: '',
-            });
-          }}
-          className={styles.addButton}
-        >
-          Add Variable
-        </button>
-      </div>
-
       <div className={styles.entriesList}>
-        {entries.map(([key, value]) => (
-          <div key={key} className={styles.entryRow}>
-            <input type="text" value={key} onChange={(e) => handleKeyChange(key, e.target.value)} className={styles.keyInput} />
+        {Object.entries(data).map(([key, value], i) => (
+          <div key={i} className={styles.entryRow}>
+            <span>{key}</span>
             <span className={styles.equals}>=</span>
-            <input type="text" value={value} onChange={(e) => handleValueChange(key, e.target.value)} className={styles.valueInput} />
+            <ValueEditor value={value} solvedValue={dataSolved[key]} onChange={(newValue) => onChange({ ...data, [key]: newValue })} />
             <button onClick={() => onChange(_.omit(data, key))} className={styles.removeButton}>
-              Remove
+              <TrashIcon />
             </button>
           </div>
         ))}
       </div>
 
-      {entries.length === 0 && <div className={styles.emptyState}>No variables defined. Click "Add Variable" to create one.</div>}
+      {newKey && (
+        <div key="new" className={styles.entryRow}>
+          <span>{newKey}</span>
+          <span className={styles.equals}>=</span>
+          <ValueEditor
+            initialValue={true}
+            onChange={(newValue) => {
+              onChange({ ...data, [newKey]: newValue });
+              setNewKey(null);
+            }}
+          />
+        </div>
+      )}
+      {!newKey && (
+        <div className={styles.addButtonContainer}>
+          <button onClick={() => setNewKey(prompt('variable name? no spaces please'))} className={styles.addButton}>
+            Add Variable
+          </button>
+        </div>
+      )}
     </div>
+  );
+}
+
+/** Go back to the original value format (number or func). Uses a naive contruction of an arrow function and evaluation, which may throw errors */
+function fromString(d) {
+  return !isNaN(Number(d))
+    ? +d // converted to number
+    : eval(`(d) => ${d.replace(/\b([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g, 'd.$1')}`); // converted to function
+}
+
+/** Turn the value into a string for editing */
+function toString(d) {
+  return d
+    .toString() // it could be a function, make sure we've got it in string form
+    .replace(/^\(d\)\s*=>\s*/, '') // Replace the '(d) => ' at the beginning
+    .replace(/d\./g, ''); // Replace 'd.' occurrences
+}
+
+function ValueEditor({ value, solvedValue, initialValue = false, onChange }) {
+  const [pendingEdits, setPendingEdits] = React.useState(initialValue ? '' : null);
+  function onEdit() {
+    setPendingEdits(toString(value));
+  }
+  function onSave() {
+    try {
+      onChange(fromString(pendingEdits));
+      setPendingEdits(null);
+    } catch (err) {
+      alert(`Error in expression:\n${err.message}`);
+    }
+  }
+
+  return pendingEdits === null ? (
+    <span onClick={onEdit} style={{ cursor: 'pointer' }}>
+      {solvedValue ?? value}
+    </span>
+  ) : (
+    <>
+      <input
+        type="text"
+        maxLength={100}
+        value={pendingEdits}
+        onChange={(e) => setPendingEdits(e.target.value)}
+        className={styles.valueInput}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') onSave();
+          else if (e.key === 'Escape') setPendingEdits(null);
+        }}
+        autoFocus
+        spellCheck="false"
+      />
+
+      <button onClick={onSave}>save</button>
+      <button onClick={() => setPendingEdits(null)}>cancel</button>
+    </>
   );
 }
