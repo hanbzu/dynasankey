@@ -1,28 +1,23 @@
-import { sankey } from 'd3-sankey';
-import { useState, useEffect, useRef } from 'react';
-import yaml from 'js-yaml';
+import React from 'react';
 import { getAdditionalFormulasBasedOnFlows, solve } from './logic';
-import * as Plot from '@observablehq/plot';
 import _ from 'lodash';
 import SankeyPlot from './SankeyPlot.jsx';
-
-function adaptData({ values, flows }) {
-  console.log('···values', values);
-  console.log('···flows', flows);
-  const nodes = _.uniq(
-    Object.entries(flows)
-      .reduce((acc, [key, { from, to }]) => [...acc, from ?? `_${key}-from`, to ?? `_${key}-to`], [])
-      .filter((d) => d)
-  ).map((name, i) => ({ node: i, name }));
-  const links = Object.entries(flows).map(([key, { from, to }]) => ({
-    source: nodes.findIndex((d) => d.name === (from ?? `_${key}-from`)),
-    target: nodes.findIndex((d) => d.name === (to ?? `_${key}-to`)),
-    value: values[key],
-  }));
-  return { nodes, links };
-}
+import ValuesEditor from './ValuesEditor.jsx';
 
 function App() {
+  const [tmpValues, setTmpValues] = React.useState({
+    seats: '350',
+    occupancy: '0.7',
+    avg_ticket_price: '137.38',
+    tickets: 'avg_ticket_price * seats * occupancy',
+    subsidy: '32200',
+    rdc_profit: '(per_km_cost + fixed_cost) * 0.1',
+    distance: '1380',
+    per_km_cost: 'distance * 28',
+    coaches: '10',
+    fixed_cost: 'coaches * 1000',
+  });
+
   const values = {
     seats: 350,
     occupancy: 0.7,
@@ -47,7 +42,7 @@ function App() {
   };
 
   const sankeyData = adaptData({
-    values: solve({ ...values, ...getAdditionalFormulasBasedOnFlows({ flows, values }) }),
+    values: solve({ ...values, ...getAdditionalFormulasBasedOnFlows(flows, Object.keys(values)) }),
     flows,
   });
   console.log('sankeyData', sankeyData);
@@ -68,9 +63,26 @@ function App() {
 
       <main>
         <SankeyPlot height={400} width={800} sankeyData={sankeyData} />
+        <ValuesEditor data={tmpValues} onChange={setTmpValues} />
       </main>
     </div>
   );
 }
 
 export default App;
+
+function adaptData({ values, flows }) {
+  console.log('···values', values);
+  console.log('···flows', flows);
+  const nodes = _.uniq(
+    Object.entries(flows)
+      .reduce((acc, [key, { from, to }]) => [...acc, from ?? `_${key}-from`, to ?? `_${key}-to`], [])
+      .filter((d) => d)
+  ).map((name, i) => ({ node: i, name }));
+  const links = Object.entries(flows).map(([key, { from, to }]) => ({
+    source: nodes.findIndex((d) => d.name === (from ?? `_${key}-from`)),
+    target: nodes.findIndex((d) => d.name === (to ?? `_${key}-to`)),
+    value: values[key],
+  }));
+  return { nodes, links };
+}
