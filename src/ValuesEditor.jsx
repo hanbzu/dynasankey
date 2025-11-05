@@ -7,14 +7,14 @@ export default function ValuesEditor({ data, dataSolved = {}, onChange }) {
   const [newKey, setNewKey] = React.useState();
 
   return (
-    <div className={styles.container}>
-      <div className={styles.entriesList}>
+    <div className="container">
+      <div className="list">
         {Object.entries(data).map(([key, value], i) => (
-          <div key={i} className={styles.entryRow}>
+          <div key={i} className="row">
             <span>{key}</span>
             <span className={styles.equals}>=</span>
             <ValueEditor value={value} solvedValue={dataSolved[key]} onChange={(newValue) => onChange({ ...data, [key]: newValue })} />
-            <button onClick={() => onChange(_.omit(data, key))} className={styles.removeButton}>
+            <button onClick={() => onChange(_.omit(data, key))} className="btn-icon">
               <TrashIcon />
             </button>
           </div>
@@ -22,7 +22,7 @@ export default function ValuesEditor({ data, dataSolved = {}, onChange }) {
       </div>
 
       {newKey && (
-        <div key="new" className={styles.entryRow}>
+        <div key="new" className="row">
           <span>{newKey}</span>
           <span className={styles.equals}>=</span>
           <ValueEditor
@@ -36,7 +36,7 @@ export default function ValuesEditor({ data, dataSolved = {}, onChange }) {
       )}
       {!newKey && (
         <div className={styles.addButtonContainer}>
-          <button onClick={() => setNewKey(prompt('variable name? no spaces please'))} className={styles.addButton}>
+          <button onClick={() => setNewKey(prompt('variable name? no spaces please'))} className="btn">
             Add Variable
           </button>
         </div>

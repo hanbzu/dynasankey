@@ -1,0 +1,70 @@
+.flowItem {
+  display: grid;
+  grid-template-columns: 150px 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.flowId {
+  font-weight: normal;
+  font-size: 14px;
+  color: #333;
+  word-break: break-word;
+}
+
+.flowField {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flowField label {
+  font-size: 14px;
+  color: #666;
+  min-width: 35px;
+}
+
+.select {
+  flex: 1;
+  background-color: white;
+  cursor: pointer;
+}
+
+.addNodeButton {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background-color: gray;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.addNodeButton:hover {
+  background-color: black;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .flowItem {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .flowId {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .deleteButton {
+    width: 100%;
+  }
+}

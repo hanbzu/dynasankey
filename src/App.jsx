@@ -5,6 +5,7 @@ import solve from './logic/solve.js';
 import _ from 'lodash';
 import SankeyPlot from './SankeyPlot.jsx';
 import ValuesEditor from './ValuesEditor.jsx';
+import FlowsEditor from './FlowsEditor.jsx';
 import { useUrlState } from './useUrlState';
 
 function App() {
@@ -13,10 +14,7 @@ function App() {
 
   const valuesRunnable = _.mapValues(state.values, fromString); // Can throw TODO
   const dataSolved = solve({ ...valuesRunnable, ...getAdditionalFormulasBasedOnFlows(state.flows, Object.keys(valuesRunnable)) });
-  const sankeyData = adaptData({
-    values: dataSolved,
-    flows: state.flows,
-  });
+  const sankeyData = adaptData({ values: dataSolved, flows: state.flows });
   console.log('---sankeyData', sankeyData);
 
   return (
@@ -36,7 +34,10 @@ function App() {
       <main>
         {sankeyData?.links?.length > 0 && <SankeyPlot height={400} width={800} sankeyData={sankeyData} />}
         <ValuesEditor data={state.values} dataSolved={dataSolved} onChange={(values) => setState((s) => ({ ...s, values }))} />
-        <button onClick={() => setState(EXAMPLE_STATE)}>Load example</button>
+        <FlowsEditor data={state.flows} onChange={(flows) => setState((s) => ({ ...s, flows }))} />
+        <button className="btn" onClick={() => setState(EXAMPLE_STATE)}>
+          Load example
+        </button>
       </main>
     </div>
   );
