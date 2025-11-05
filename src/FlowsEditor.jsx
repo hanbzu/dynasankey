@@ -40,10 +40,14 @@ export default function FlowsEditor({ data = {}, onChange }) {
     });
   };
 
-  const handleAddNewNode = (flowId, field) => {
-    const newNode = prompt('Enter new node name:');
-    if (!newNode || !newNode.trim()) return;
-    handleUpdateFlow(flowId, field, newNode);
+  const handleNodeChange = (flowId, field, value) => {
+    if (value === '__ADD_NEW__') {
+      const newNode = prompt('Enter new node name:');
+      if (!newNode || !newNode.trim()) return;
+      handleUpdateFlow(flowId, field, newNode);
+    } else {
+      handleUpdateFlow(flowId, field, value);
+    }
   };
 
   const nodes = getAllNodes();
@@ -67,33 +71,25 @@ export default function FlowsEditor({ data = {}, onChange }) {
               <div className={styles.flowId}>{id}</div>
 
               <div className={styles.flowField}>
-                <label>From:</label>
-                <select value={flow.from || ''} onChange={(e) => handleUpdateFlow(id, 'from', e.target.value)} className={styles.select}>
-                  <option value="">-- None --</option>
+                <select value={flow.from || ''} onChange={(e) => handleNodeChange(id, 'from', e.target.value)} className={styles.select}>
+                  <option value=""></option>
                   {nodes.map((node) => (
                     <option key={node} value={node}>
                       {node}
                     </option>
                   ))}
+                  <option value="__ADD_NEW__">+ Add new node...</option>
                 </select>
-                <button onClick={() => handleAddNewNode(id, 'from')} className={styles.addNodeButton} title="Add new node">
-                  +
-                </button>
-              </div>
-
-              <div className={styles.flowField}>
-                <label>To:</label>
-                <select value={flow.to || ''} onChange={(e) => handleUpdateFlow(id, 'to', e.target.value)} className={styles.select}>
-                  <option value="">-- None --</option>
+                <span className={styles.arrow}>→</span>
+                <select value={flow.to || ''} onChange={(e) => handleNodeChange(id, 'to', e.target.value)} className={styles.select}>
+                  <option value=""></option>
                   {nodes.map((node) => (
                     <option key={node} value={node}>
                       {node}
                     </option>
                   ))}
+                  <option value="__ADD_NEW__">+ Add new node...</option>
                 </select>
-                <button onClick={() => handleAddNewNode(id, 'to')} className={styles.addNodeButton} title="Add new node">
-                  +
-                </button>
               </div>
 
               <button onClick={() => handleDeleteFlow(id)} className="btn-icon" title="Delete flow">
