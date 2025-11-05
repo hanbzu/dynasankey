@@ -91,7 +91,7 @@ export default function FlowsEditor({ data = {}, onChange }) {
       </div>
       <div style={{ marginTop: 15 }}>
         <button onClick={handleAddFlow} className="btn">
-          Add Flow
+          Add flow
         </button>
       </div>
     </div>

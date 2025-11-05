@@ -14,3 +14,12 @@
 .valueInput {
   flex: 1;
 }
+
+.editableValue {
+  cursor: pointer;
+}
+
+.editableValue:hover {
+  color: #007bff;
+  text-decoration: underline;
+}

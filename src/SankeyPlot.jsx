@@ -1,6 +1,7 @@
 import React from 'react';
 import * as Plot from '@observablehq/plot';
 import { sankey } from 'd3-sankey';
+import formatNum from './logic/formatNum';
 
 const ASPECT_RATIO = 2.5;
 
@@ -27,20 +28,27 @@ export default function SankeyPlot({ sankeyData }) {
           ])
           .map((l) => Plot.areaY(l, { x: 'x', y1: 'y0', y2: 'y1', curve: 'bump-x', fill: '#000', fillOpacity: 0.1, order: 'value' })),
         Plot.rect(sankeyData.nodes, { x1: 'x0', x2: 'x1', y1: 'y0', y2: 'y1', fill: 'black' }),
-        Plot.text(sankeyData.nodes, { x: 'x1', dx: 5, y: (d) => (d.y1 + d.y0) / 2, text: 'name', textAnchor: 'start' }),
+        Plot.text(sankeyData.nodes, {
+          x: 'x1',
+          dx: 5,
+          y: (d) => (d.y1 + d.y0) / 2,
+          text: (d) => `${d.name}\n${formatNum(d.value)}`,
+          textAnchor: 'start',
+          fontFamily: 'monospace',
+        }),
       ],
       x: { axis: null },
       y: { axis: null },
       width: width,
       height: height,
       marginTop: 20,
-      marginRight: 40,
+      marginRight: 80,
     });
     containerRef.current.append(plot);
     return () => plot.remove();
   });
 
-  return <div style={{ border: '1px solid pink', width: '100%' }} ref={containerRef} />;
+  return <div style={{ width: '100%' }} ref={containerRef} />;
 }
 
 function useContainerWidth(ref) {

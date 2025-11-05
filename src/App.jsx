@@ -53,7 +53,7 @@ const EMPTY_STATE = {
 
 const EXAMPLE_STATE = {
   title: 'Simplified sleeper model',
-  description: 'Lorem ipsum',
+  description: 'This is a simplified economic model of running a night train',
   values: {
     seats: 350,
     occupancy: 0.7,

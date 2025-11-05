@@ -4,6 +4,7 @@ import styles from './ValuesEditor.module.css';
 import TrashIcon from './assets/icons/TrashIcon';
 import CheckIcon from './assets/icons/CheckIcon';
 import XIcon from './assets/icons/XIcon';
+import formatNum from './logic/formatNum';
 
 export default function ValuesEditor({ data, dataSolved = {}, onChange }) {
   const [newKey, setNewKey] = React.useState();
@@ -40,7 +41,7 @@ export default function ValuesEditor({ data, dataSolved = {}, onChange }) {
       {!newKey && (
         <div className={styles.addButtonContainer}>
           <button onClick={() => setNewKey(prompt('variable name? no spaces please'))} className="btn">
-            Add Variable
+            Add value
           </button>
         </div>
       )}
@@ -63,8 +64,8 @@ function ValueEditor({ value, solvedValue, initialValue = false, onChange }) {
   }
 
   return pendingEdits === null ? (
-    <span onClick={onEdit} style={{ cursor: 'pointer' }}>
-      {solvedValue ?? value}
+    <span onClick={onEdit} className={styles.editableValue} title="Click to edit">
+      {solvedValue ? formatNum(solvedValue) : value}
     </span>
   ) : (
     <>
