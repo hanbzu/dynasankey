@@ -34,7 +34,7 @@ function decode(initialValue) {
       const deserialized = JSON.parse(decodeURIComponent(atob(hash)));
       if (deserialized) return deserialized;
     } catch (err) {
-      alert(`Starting from scratch after failing to decode URL data.\n\nHash: ${hash}\n\nError: ${err.message}`);
+      alert(`Starting from scratch after failing to decode URL data.\n\nError: ${err.message}\n\nHash: ${hash}`);
       const newHash = encode(initialValue);
       window.history.replaceState(null, '', `#${newHash}`);
       return initialValue;

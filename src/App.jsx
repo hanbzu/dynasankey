@@ -1,13 +1,14 @@
 import React from 'react';
-import { getAdditionalFormulasBasedOnFlows, solve, fromString } from './logic';
+import fromString from './logic/fromString.js';
+import getAdditionalFormulasBasedOnFlows from './logic/getAdditionalFormulasBasedOnFlows.js';
+import solve from './logic/solve.js';
 import _ from 'lodash';
 import SankeyPlot from './SankeyPlot.jsx';
 import ValuesEditor from './ValuesEditor.jsx';
 import { useUrlState } from './useUrlState';
 
 function App() {
-  const [state, setState] = useUrlState({ values: {}, flows: {} });
-
+  const [state, setState] = useUrlState(EMPTY_STATE);
   console.log('···state', state);
 
   const valuesRunnable = _.mapValues(state.values, fromString); // Can throw TODO
@@ -16,7 +17,7 @@ function App() {
     values: dataSolved,
     flows: state.flows,
   });
-  console.log('sankeyData', sankeyData);
+  console.log('---sankeyData', sankeyData);
 
   return (
     <div
@@ -28,13 +29,14 @@ function App() {
       }}
     >
       <header style={{ marginBottom: '2rem' }}>
-        <h1 style={{ margin: 0, fontSize: '2rem', color: '#333' }}>Sleeper model lite</h1>
-        <p style={{ color: '#666', marginTop: '0.5rem' }}>Sankey diagram solver and flow analyzer</p>
+        <h1 style={{ margin: 0, fontSize: '2rem', color: '#333' }}>{state.title}</h1>
+        <p style={{ color: '#666', marginTop: '0.5rem' }}>{state.description}</p>
       </header>
 
       <main>
-        {Object.keys(state.flows).length > 0 && <SankeyPlot height={400} width={800} sankeyData={sankeyData} />}
+        {sankeyData?.links?.length > 0 && <SankeyPlot height={400} width={800} sankeyData={sankeyData} />}
         <ValuesEditor data={state.values} dataSolved={dataSolved} onChange={(values) => setState((s) => ({ ...s, values }))} />
+        <button onClick={() => setState(EXAMPLE_STATE)}>Load example</button>
       </main>
     </div>
   );
@@ -58,18 +60,27 @@ function adaptData({ values, flows }) {
   return { nodes, links };
 }
 
-const DEFAULT_STATE = {
+const EMPTY_STATE = {
+  title: 'Click to change title',
+  description: 'Click to change description',
+  values: {},
+  flows: {},
+};
+
+const EXAMPLE_STATE = {
+  title: 'Simplified sleeper model',
+  description: 'Lorem ipsum',
   values: {
     seats: 350,
     occupancy: 0.7,
     avg_ticket_price: 137.38,
-    tickets: (d) => d.avg_ticket_price * d.seats * d.occupancy,
+    tickets: 'avg_ticket_price * seats * occupancy',
     subsidy: 32200,
-    rdc_profit: (d) => (d.per_km_cost + d.fixed_cost) * 0.1,
+    rdc_profit: '(per_km_cost + fixed_cost) * 0.1',
     distance: 1380,
-    per_km_cost: (d) => d.distance * 28,
+    per_km_cost: 'distance * 28',
     coaches: 10,
-    fixed_cost: (d) => d.coaches * 1000,
+    fixed_cost: 'coaches * 1000',
   },
   flows: {
     tickets: { to: 'revenue' },
@@ -81,5 +92,3 @@ const DEFAULT_STATE = {
     fixed_cost: { from: 'cost' },
   },
 };
-
-// http://localhost:5173/dynasankey/#JTdCJTIydmFsdWVzJTIyJTNBJTdCJTIyc2VhdHMlMjIlM0ElMjIzNTAlMjIlMkMlMjJvY2N1cGFuY3klMjIlM0ElMjIwLjclMjIlMkMlMjJhdmdfdGlja2V0X3ByaWNlJTIyJTNBJTIyMTM3LjM4JTIyJTJDJTIydGlja2V0cyUyMiUzQSUyMmF2Z190aWNrZXRfcHJpY2UlMjAqJTIwc2VhdHMlMjAqJTIwb2NjdXBhbmN5JTIyJTJDJTIyc3Vic2lkeSUyMiUzQSUyMjMyMjAwJTIyJTJDJTIycmRjX3Byb2ZpdCUyMiUzQSUyMihwZXJfa21fY29zdCUyMCUyQiUyMGZpeGVkX2Nvc3QpJTIwKiUyMDAuMSUyMiUyQyUyMmRpc3RhbmNlJTIyJTNBJTIyMTM4MCUyMiUyQyUyMnBlcl9rbV9jb3N0JTIyJTNBJTIyZGlzdGFuY2UlMjAqJTIwMjglMjIlMkMlMjJjb2FjaGVzJTIyJTNBJTIyMTAlMjIlMkMlMjJmaXhlZF9jb3N0JTIyJTNBJTIyY29hY2hlcyUyMColMjAxZTMlMjIlN0QlMkMlMjJmbG93cyUyMiUzQSU3QiUyMnRpY2tldHMlMjIlM0ElN0IlMjJ0byUyMiUzQSUyMnJldmVudWUlMjIlN0QlMkMlMjJzdWJzaWR5JTIyJTNBJTdCJTIydG8lMjIlM0ElMjJyZXZlbnVlJTIyJTdEJTJDJTIyc2JiX3Byb2ZpdCUyMiUzQSU3QiUyMmZyb20lMjIlM0ElMjJyZXZlbnVlJTIyJTdEJTJDJTIyY29zdCUyMiUzQSU3QiUyMmZyb20lMjIlM0ElMjJyZXZlbnVlJTIyJTJDJTIydG8lMjIlM0ElMjJjb3N0JTIyJTdEJTJDJTIycmRjX3Byb2ZpdCUyMiUzQSU3QiUyMmZyb20lMjIlM0ElMjJjb3N0JTIyJTdEJTJDJTIycGVyX2ttX2Nvc3QlMjIlM0ElN0IlMjJmcm9tJTIyJTNBJTIyY29zdCUyMiU3RCUyQyUyMmZpeGVkX2Nvc3QlMjIlM0ElN0IlMjJmcm9tJTIyJTNBJTIyY29zdCUyMiU3RCU3RCU3RA==
