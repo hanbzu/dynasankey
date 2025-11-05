@@ -19,8 +19,24 @@ function App() {
       }}
     >
       <header style={{ marginBottom: '2rem' }}>
-        <h1 style={{ margin: 0, fontSize: '2rem', color: '#333' }}>{state.title}</h1>
-        <p style={{ color: '#666', marginTop: '0.5rem' }}>{state.description}</p>
+        <h1>
+          <input
+            type="text"
+            maxLength={50}
+            value={state.title}
+            onChange={(e) => setState((s) => ({ ...s, title: e.target.value }))}
+            style={{ border: 'none', padding: 0, width: '100%', font: 'inherit' }}
+          />
+        </h1>
+        <p style={{ color: '#666', marginTop: '0.5rem' }}>
+          <input
+            type="text"
+            maxLength={150}
+            value={state.description}
+            onChange={(e) => setState((s) => ({ ...s, description: e.target.value }))}
+            style={{ border: 'none', padding: 0, width: '100%', font: 'inherit' }}
+          />
+        </p>
       </header>
 
       <main>
