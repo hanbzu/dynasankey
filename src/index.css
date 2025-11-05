@@ -69,8 +69,14 @@ select:focus {
 }
 
 /* Common layout styles */
-.container {
-  padding: 20px;
+main {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 .list {
@@ -106,4 +112,50 @@ select:focus {
   margin: 0;
   font-size: 18px;
   font-weight: normal;
+}
+
+/* App-specific styles */
+.title-input {
+  border: none;
+  padding: 0;
+  width: 100%;
+  font: inherit;
+}
+
+.description {
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+.description-input {
+  border: none;
+  padding: 0;
+  width: 100%;
+  font: inherit;
+}
+
+.error-message {
+  color: red;
+}
+
+.load-example-btn {
+  margin-top: 100px;
+}
+
+/* Editors grid - responsive layout */
+.editors-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .editors-grid {
+    grid-template-columns: 1fr 1.5fr;
+  }
+
+  .editors-grid > * {
+    min-width: 0;
+  }
 }

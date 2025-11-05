@@ -2,12 +2,15 @@ import React from 'react';
 import _ from 'lodash';
 import styles from './ValuesEditor.module.css';
 import TrashIcon from './assets/icons/TrashIcon';
+import CheckIcon from './assets/icons/CheckIcon';
+import XIcon from './assets/icons/XIcon';
 
 export default function ValuesEditor({ data, dataSolved = {}, onChange }) {
   const [newKey, setNewKey] = React.useState();
 
   return (
-    <div className="container">
+    <div>
+      <h2>Values</h2>
       <div className="list">
         {Object.entries(data).map(([key, value], i) => (
           <div key={i} className="row">
@@ -79,8 +82,12 @@ function ValueEditor({ value, solvedValue, initialValue = false, onChange }) {
         spellCheck="false"
       />
 
-      <button onClick={onSave}>save</button>
-      <button onClick={() => setPendingEdits(null)}>cancel</button>
+      <button onClick={onSave} className="btn-icon">
+        <CheckIcon />
+      </button>
+      <button onClick={() => setPendingEdits(null)} className="btn-icon">
+        <XIcon />
+      </button>
     </>
   );
 }

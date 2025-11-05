@@ -10,44 +10,35 @@ function App() {
   const { sankeyData, dataSolved, error } = prepareData(state);
 
   return (
-    <div
-      style={{
-        maxWidth: '900px',
-        margin: '0 auto',
-        padding: '2rem',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-      }}
-    >
-      <header style={{ marginBottom: '2rem' }}>
-        <h1>
-          <input
-            type="text"
-            maxLength={50}
-            value={state.title}
-            onChange={(e) => setState((s) => ({ ...s, title: e.target.value }))}
-            style={{ border: 'none', padding: 0, width: '100%', font: 'inherit' }}
-          />
-        </h1>
-        <p style={{ color: '#666', marginTop: '0.5rem' }}>
-          <input
-            type="text"
-            maxLength={150}
-            value={state.description}
-            onChange={(e) => setState((s) => ({ ...s, description: e.target.value }))}
-            style={{ border: 'none', padding: 0, width: '100%', font: 'inherit' }}
-          />
-        </p>
-      </header>
+    <main>
+      <h1>
+        <input
+          type="text"
+          maxLength={50}
+          value={state.title}
+          onChange={(e) => setState((s) => ({ ...s, title: e.target.value }))}
+          className="title-input"
+        />
+      </h1>
+      <p className="description">
+        <input
+          type="text"
+          maxLength={150}
+          value={state.description}
+          onChange={(e) => setState((s) => ({ ...s, description: e.target.value }))}
+          className="description-input"
+        />
+      </p>
 
-      <main>
-        {error ? <span style={{ color: 'red' }}>{error}</span> : <SankeyPlot height={400} width={800} sankeyData={sankeyData} />}
+      {error ? <span className="error-message">{error}</span> : <SankeyPlot height={400} width={800} sankeyData={sankeyData} />}
+      <div className="editors-grid">
         <ValuesEditor data={state.values} dataSolved={dataSolved} onChange={(values) => setState((s) => ({ ...s, values }))} />
         <FlowsEditor data={state.flows} onChange={(flows) => setState((s) => ({ ...s, flows }))} />
-        <button style={{ marginTop: 100 }} onClick={() => setState(EXAMPLE_STATE)}>
-          Load example
-        </button>
-      </main>
-    </div>
+      </div>
+      <button className="load-example-btn" onClick={() => setState(EXAMPLE_STATE)}>
+        Load example
+      </button>
+    </main>
   );
 }
 

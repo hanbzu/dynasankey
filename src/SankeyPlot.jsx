@@ -35,5 +35,5 @@ export default function SankeyPlot({ height, width, sankeyData }) {
     }
   });
 
-  return <div ref={containerRef} />;
+  return <div style={{ border: '1px solid pink' }} ref={containerRef} />;
 }

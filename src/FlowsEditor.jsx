@@ -54,7 +54,8 @@ export default function FlowsEditor({ data = {}, onChange }) {
   const flows = Object.entries(data || {});
 
   return (
-    <div className="container">
+    <div>
+      <h2>Flows</h2>
       <div className="list">
         {flows.map(([id, flow]) => (
           <div key={id} className={styles.flowItem}>
