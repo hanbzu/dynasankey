@@ -1,21 +1,13 @@
-import React from 'react';
-import fromString from './logic/fromString.js';
-import getAdditionalFormulasBasedOnFlows from './logic/getAdditionalFormulasBasedOnFlows.js';
-import solve from './logic/solve.js';
 import _ from 'lodash';
 import SankeyPlot from './SankeyPlot.jsx';
 import ValuesEditor from './ValuesEditor.jsx';
 import FlowsEditor from './FlowsEditor.jsx';
 import { useUrlState } from './useUrlState';
+import prepareData from './logic/prepareData.js';
 
 function App() {
   const [state, setState] = useUrlState(EMPTY_STATE);
-  console.log('···state', state);
-
-  const valuesRunnable = _.mapValues(state.values, fromString); // Can throw TODO
-  const dataSolved = solve({ ...valuesRunnable, ...getAdditionalFormulasBasedOnFlows(state.flows, Object.keys(valuesRunnable)) });
-  const sankeyData = adaptData({ values: dataSolved, flows: state.flows });
-  console.log('---sankeyData', sankeyData);
+  const { sankeyData, dataSolved, error } = prepareData(state);
 
   return (
     <div
@@ -32,7 +24,7 @@ function App() {
       </header>
 
       <main>
-        {sankeyData?.links?.length > 0 && <SankeyPlot height={400} width={800} sankeyData={sankeyData} />}
+        {error ? <span style={{ color: 'red' }}>{error}</span> : <SankeyPlot height={400} width={800} sankeyData={sankeyData} />}
         <ValuesEditor data={state.values} dataSolved={dataSolved} onChange={(values) => setState((s) => ({ ...s, values }))} />
         <FlowsEditor data={state.flows} onChange={(flows) => setState((s) => ({ ...s, flows }))} />
         <button className="btn" onClick={() => setState(EXAMPLE_STATE)}>
@@ -44,22 +36,6 @@ function App() {
 }
 
 export default App;
-
-function adaptData({ values, flows }) {
-  // console.log('···values', values);
-  // console.log('···flows', flows);
-  const nodes = _.uniq(
-    Object.entries(flows)
-      .reduce((acc, [key, { from, to }]) => [...acc, from ?? key, to ?? key], [])
-      .filter((d) => d)
-  ).map((name, i) => ({ node: i, name }));
-  const links = Object.entries(flows).map(([key, { from, to }]) => ({
-    source: nodes.findIndex((d) => d.name === (from ?? key)),
-    target: nodes.findIndex((d) => d.name === (to ?? key)),
-    value: values[key],
-  }));
-  return { nodes, links };
-}
 
 const EMPTY_STATE = {
   title: 'Click to change title',
